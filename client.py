@@ -1,20 +1,39 @@
 #!/usr/bin/env python
+import socket,sys,multiprocessing
 
-import socket,sys
 
-
-TCP_IP = '127.0.0.1'
+IP = '127.0.0.1'
 TCP_PORT = int(sys.argv[1])
 print TCP_PORT,"port"
 BUFFER_SIZE = 1024
 MESSAGE = "Hello, World!"
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s.connect((TCP_IP, TCP_PORT))
+port_listen=5100
+def read_thread(q):
+        
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.bind((IP, port_listen))
+        s.listen(5)
+
+        while 1:
+                        conn, addr = s.accept()
+                        data = conn.recv(BUFFER_SIZE)
+                        if not data: break
+                        #conn.send(data) #echo
+                        q.put(data)
+                        print "received",data
+                        data=0 #reset the buffer        
+                        #conn.close() 
+queue = multiprocessing.Queue()
+p = multiprocessing.Process(target=read_thread, args=(queue,))
+p.start()
+#p.join()
 
 while 1:
-	s.send(raw_input("Enter Value"))
-	data = s.recv(BUFFER_SIZE)
-
-s.close()
+        data=raw_input("Enter Value")
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.connect((IP, TCP_PORT))
+        s.send(data)
+        #data = s.recv(BUFFER_SIZE) #echo
+        s.close()
 
 print "received data:", data
