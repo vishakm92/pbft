@@ -1,7 +1,8 @@
-import socket,multiprocessing
+import socket,multiprocessing,sys
 import os,time,Queue,exceptions
 IP = '127.0.0.1'
-PORT_C = 5000
+PORT_C = int(sys.argv[2])
+print "connecting to port",PORT_C
 BUFFER_SIZE = 20  # Normally 1024, but we want fast response
 
 
@@ -18,13 +19,15 @@ def send_preprepare(q):
 	TCP_PORT = 5000
 	BUFFER_SIZE = 1024
 	#send preprepare to all ports
-	for i in range((sys.argv[0])):
-		PORT = i+5001
-		s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-		s.connect((TCP_IP, PORT))
-		MESSAGE = q.get()
-		s.send("Preprepare, "+MESSAGE)#conconcanate with string, prepare, View number - (port-5000)
-		s.close()
+	while 1:
+		while not q.empty():
+			MESSAGE = q.get()
+			for i in range(int(sys.argv[1])):
+				PORT = i+5001
+				s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+				s.connect((TCP_IP, PORT))
+				s.send("Preprepare, "+MESSAGE)#conconcanate with string, prepare, View number - (port-5000)
+				s.close()
 
 def read_thread(q):
 	while 1:
@@ -49,6 +52,6 @@ queue = multiprocessing.Queue()
 p = multiprocessing.Process(target=read_thread, args=(queue,))
 p.start()
 
-leader = multiprocessing.Process(target=leader_activity, args=(queue,))
+leader = multiprocessing.Process(target=send_preprepare, args=(queue,))
 leader.start()
 
