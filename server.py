@@ -6,7 +6,7 @@ PORT_C = 5000
 BUFFER_SIZE = 20  # Normally 1024, but we want fast response
 seq_no=0
 
-PORT_S1=5002
+print "Server Leader"
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.bind((IP, PORT_C))
 s.listen(5)
@@ -39,6 +39,7 @@ def read_thread(q):
 	while 1:
 			conn, addr = s.accept()
 			data = conn.recv(BUFFER_SIZE)
+			print "received data",data
 			if not data: break
 			#conn.send(data) #echo
 			q.put(data)
