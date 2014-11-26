@@ -31,25 +31,25 @@ def toHex(s):
 
 def send_to_slave(commit_q,response_q):      
     data=commit_q.get()
-    print "data in commit ",toHex(data)
+    #print "data in commit ",toHex(data)
     s_local = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s_local.connect((TCP_IP, 502))
     s_local.send(data)
     data=s_local.recv(BUFFER_SIZE)
-    print "response from the slave",toHex(data)
+    #print "response from the slave",toHex(data)
     response_q.put(data)
 
 
 def commit_message_fn(commit_q,response_q): 
-    print "in commit thread"
+    #print "in commit thread"
     global port_client
     while 1:    
         if not commit_q.empty():
-            print "in commit "
+            #print "in commit "
             send_to_slave(commit_q,response_q)
             s_local = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             s_local.connect((TCP_IP, port_client))
-            print "sending response to client"
+            #print "sending response to client"
             s_local.send(response_q.get())
 
 def process_message_fn(msg_q,prepare_q,commit_q):
@@ -104,14 +104,14 @@ def sendall(message):
 
 
 def read_thread(q):
-    print "server id",server_id,"number of replica",sys.argv[2]
+    #print "server id",server_id,"number of replica",sys.argv[2]
     while 1:
         conn, addr = s.accept()
     #print 'Client Connected at', addr
         data = conn.recv(BUFFER_SIZE)
         if not data: break
         #conn.send(data) #echo
-        print "Received ",data
+        #print "Received ",data
         q.put(data)
         #conn.close()
         data=0#reset the data

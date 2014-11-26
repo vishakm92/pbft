@@ -36,7 +36,7 @@ def listen_replica(q,r):
                 if not data: break
                 #conn.send(data) #echo
                 r.put(data)
-                print "received response --",toHex(data)
+                #print "received response --",toHex(data)
                 data=0 #reset the buffer        
                 #conn.send()
                 #conn.close() 
@@ -54,9 +54,15 @@ def listen_master(q,r):
                 #conn.send(data) #echo
                 q.put(data)
                 print "received query",toHex(data)
-                data=0 #reset the buffer        
-                conn.send(r.get())
-                #conn.close() 
+                data=0 #reset the buffer      
+		response=r.get()  
+                #print "these should be same",toHex(response),toHex(r.get()),toHex(r.get()),toHex(r.get()) 
+		print "sending resposne",toHex(response)
+		conn.send(response)
+                r.get()
+		r.get()
+		r.get()
+		#conn.close() 
 
 def send_leader_server(q,r):
         TCP_PORT = 5000
