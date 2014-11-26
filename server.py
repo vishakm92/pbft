@@ -3,7 +3,7 @@ import socket,multiprocessing,sys
 import os,time,Queue,exceptions
 IP = '127.0.0.1'
 PORT_C = 5000
-BUFFER_SIZE = 20  # Normally 1024, but we want fast response
+BUFFER_SIZE = 1024  # Normally 1024, but we want fast response
 seq_no=0
 
 print "Server Leader"

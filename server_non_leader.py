@@ -11,7 +11,7 @@ TCP_IP = '127.0.0.1'
 TCP_PORT = int(sys.argv[1])
 print "Server listening in port ", TCP_PORT
 server_id=TCP_PORT-5000
-BUFFER_SIZE = 20    # Normally 1024, but we want fast response
+BUFFER_SIZE = 1024    # Normally 1024, but we want fast response
 port_client=5100
 
 
@@ -30,11 +30,13 @@ def toHex(s):
 
 
 def send_to_slave(commit_q,response_q):      
+    data=commit_q.get()
+    print "data in commit ",toHex(data)
     s_local = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s_local.connect((TCP_IP, 502))
-    s_local.send(commit_q.get())
+    s_local.send(data)
     data=s_local.recv(BUFFER_SIZE)
-    print "response from the slave",data
+    print "response from the slave",toHex(data)
     response_q.put(data)
 
 
@@ -43,10 +45,11 @@ def commit_message_fn(commit_q,response_q):
     global port_client
     while 1:    
         if not commit_q.empty():
+            print "in commit "
             send_to_slave(commit_q,response_q)
-    	    s_local = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    	    s_local.connect((TCP_IP, port_client))
-    	    print "sending response to client"
+            s_local = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s_local.connect((TCP_IP, port_client))
+            print "sending response to client"
             s_local.send(response_q.get())
 
 def process_message_fn(msg_q,prepare_q,commit_q):

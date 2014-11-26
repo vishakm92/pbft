@@ -16,14 +16,14 @@ def toHex(s):
                 lst.append(hv) 
         return reduce(lambda x,y:x+y, lst)
 
-#def send_to_slave(q,r):
-#        while 1:        
-#                s_local = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-#                s_local.connect((IP, 502))
-#                s_local.send(q.get())
-#                data=s_local.recv(BUFFER_SIZE)
-#                r.put(data)
-#                print "response obtained",toHex(data)
+def send_to_slave(q,r):
+        while 1:        
+                s_local = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                s_local.connect((IP, 502))
+                s_local.send(q.get())
+                data=s_local.recv(BUFFER_SIZE)
+                r.put(data)
+                print "response obtained",toHex(data)
 
 def listen_replica(q,r):
         global port_listen_replica
@@ -79,3 +79,7 @@ p1.start()
 
 p2 = multiprocessing.Process(target=send_leader_server, args=(query,response))
 p2.start()
+
+p3 = multiprocessing.Process(target=send_to_slave, args=(query,response))
+#p3.start()
+
