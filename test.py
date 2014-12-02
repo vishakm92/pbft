@@ -1,8 +1,5 @@
-import sys
-dict_num={1:'one',2:'two',3:'three'}
+import binascii
+data="68656c6c6f"
+text = binascii.a2b_hex(data)
+print text, "<=>", repr(data)
 
-while 1:
-	try:
-		print dict_num[int(raw_input("Enter the number"))]
-	except KeyError:
-		print "Not available---"

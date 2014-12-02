@@ -3,7 +3,7 @@
 import socket,sys,multiprocessing
 
 failures = (int(sys.argv[2]) -1) /3 #value of f iin algorithm
-preprepare={} #dictionary which has (seq,[message,count]) of preprepare messages
+preprepare={} #dictionary which has (seq,message) of preprepare messages
 prepare={} #dictionary which has (seq,count) of prepare messages
 commit={} #dictionary which has (seq,m) of commit messages
 
@@ -31,13 +31,16 @@ def toHex(s):
 
 def send_to_slave(commit_q,response_q):      
     data=commit_q.get()
+    data_list=data.split(",")
+    query=data_list[0]
+    seq=data_list[1]
     #print "data in commit ",toHex(data)
     s_local = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s_local.connect((TCP_IP, 502))
-    s_local.send(data)
+    s_local.send(query)
     data=s_local.recv(BUFFER_SIZE)
     #print "response from the slave",toHex(data)
-    response_q.put(data)
+    response_q.put(data+","+seq)
 
 
 def commit_message_fn(commit_q,response_q): 
@@ -60,12 +63,13 @@ def process_message_fn(msg_q,prepare_q,commit_q):
             message=data.split(",")
             seq=int(message[1])
             m=message[2]
-            if seq in preprepare.keys():
-                preprepare[seq] = preprepare[seq][1] + 1
-                sendall("Prepare,"+str(seq)+","+str(server_id))
-            else:
-                preprepare[seq]=[m,0]
-                sendall("Prepare,"+str(seq)+","+str(server_id))
+            #if seq in preprepare.keys():
+    #   print "gone!!"
+         #       preprepare[seq] = preprepare[seq][1] + 1
+          #      sendall("Prepare,"+str(seq)+","+str(server_id))
+           # else:
+            preprepare[seq]=m
+            sendall("Prepare,"+str(seq)+","+str(server_id))
         elif data.startswith("Prepare"):
             #Prepare message format <Prepare,seq,i>
             message=data.split(",")
@@ -76,16 +80,18 @@ def process_message_fn(msg_q,prepare_q,commit_q):
                 prepare[seq]=1
             
             #if seen 2*f prepares, then go to  prepared state
-			#Commit message format <Commit,seq,i>
+            #Commit message format <Commit,seq,i>
             if prepare[seq] == 2*failures:
                 prepare[seq]=0
                 sendall("Commit,"+str(seq)+","+str(server_id))
                 message=data.split(",")
                 seq=int(message[1])
-                commit[seq]=preprepare[seq][0]
-                commit_q.put(commit[seq])
-                sendall("Commit,"+str(seq)+","+str(server_id))
-                print "Message commited - with sequence",seq,"content - ",preprepare[seq][0]
+                if seq in preprepare.keys():
+                    query=preprepare[seq]
+                    #commit[seq]=preprepare[seq]
+                    commit_q.put(query+","+str(seq))
+                    sendall("Commit,"+str(seq)+","+str(server_id))
+                    print "Message commited - with sequence",seq,"content - ",query
 
 
 def sendall(message):
@@ -97,10 +103,11 @@ def sendall(message):
             PORT = 5000+i
             #print "sending ",message,"to port",PORT
             s_local = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            #s_local.settimeout(1)
             s_local.connect((TCP_IP, PORT))
             s_local.send(message)
             #data=s_local.recv(BUFFER_SIZE) #echo
-            #s_local.close()
+            s_local.close()
 
 
 def read_thread(q):

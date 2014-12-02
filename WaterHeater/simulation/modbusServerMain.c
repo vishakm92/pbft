@@ -141,6 +141,12 @@ int main(int argc, char *argv[])
     setRegisterBit(mb_mapping, HEATER_COIL_ENABLE, true);
     setRegisterValue(mb_mapping, HEATER_WATER_TEMP_REG,
             HEATER_TARGET_TEMP_DEG_F * 10.);
+	setRegisterValue(mb_mapping, HEATER_WATER_TEMP_REGA,
+            HEATER_TARGET_TEMP_DEG_F * 10.+10);
+	setRegisterValue(mb_mapping, HEATER_WATER_TEMP_REGB,
+            HEATER_TARGET_TEMP_DEG_F * 10.+20);
+	setRegisterValue(mb_mapping, HEATER_WATER_TEMP_REGB,
+            HEATER_TARGET_TEMP_DEG_F * 10.+30);
     pthread_mutex_unlock(&modbusRegisterAccessLock);
     
     ctx = modbus_new_tcp(modbusClientIP, modbusPort);

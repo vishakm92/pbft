@@ -6,7 +6,7 @@ BUFFER_SIZE = 1024
 MESSAGE = "Hello, World!"
 port_listen_replica=5100
 port_listen_master=5101
-
+seq_process=0
 def toHex(s):
         lst = []
         for ch in s:
@@ -26,7 +26,7 @@ def send_to_slave(q,r):
                 print "response obtained",toHex(data)
 
 def listen_replica(q,r):
-        global port_listen_replica
+        global port_listen_replica,seq_process
         s_replica = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s_replica.bind((IP, port_listen_replica))
         s_replica.listen(5)
@@ -35,7 +35,13 @@ def listen_replica(q,r):
                 data = conn.recv(BUFFER_SIZE)
                 if not data: break
                 #conn.send(data) #echo
-                r.put(data)
+                modbus_response=data.split(",")
+                print "response",toHex(modbus_response[0]),modbus_response[1]
+                #print "these should be same",toHex(response),toHex(r.get()),toHex(r.get()),toHex(r.get()) 
+                if seq_process < int(modbus_response[1]):
+                        print "sending resposne",toHex(modbus_response[0])
+                        r.put(modbus_response[0])
+                        seq_process=seq_process+1
                 #print "received response --",toHex(data)
                 data=0 #reset the buffer        
                 #conn.send()
@@ -43,7 +49,7 @@ def listen_replica(q,r):
 
 
 def listen_master(q,r):
-        global port_listen_master
+        global port_listen_master,seq_process
         s_master = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s_master.bind((IP, 5101))
         s_master.listen(5)
@@ -53,16 +59,13 @@ def listen_master(q,r):
                 if not data: break
                 #conn.send(data) #echo
                 q.put(data)
-                print "received query",toHex(data)
+                #print "received query",toHex(data)
+		#query=toHex(data)
+		#print "register is",query[16:20]
                 data=0 #reset the buffer      
-		response=r.get()  
-                #print "these should be same",toHex(response),toHex(r.get()),toHex(r.get()),toHex(r.get()) 
-		print "sending resposne",toHex(response)
-		conn.send(response)
-                r.get()
-		r.get()
-		r.get()
-		#conn.close() 
+		#print "these should be same",toHex(response),toHex(r.get()),toHex(r.get()),toHex(r.get()) 
+		conn.send(r.get())
+		conn.close() 
 
 def send_leader_server(q,r):
         TCP_PORT = 5000

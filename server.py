@@ -4,7 +4,7 @@ import os,time,Queue,exceptions
 IP = '127.0.0.1'
 PORT_C = 5000
 BUFFER_SIZE = 1024  # Normally 1024, but we want fast response
-seq_no=0
+seq_no=1
 
 print "Server Leader"
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

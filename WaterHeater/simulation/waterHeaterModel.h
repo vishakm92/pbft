@@ -55,7 +55,10 @@ extern "C" {
     
 /* address and length of value registers */
 #define HEATER_WATER_TEMP_REG 0
-#define NUM_INPUT_VALUE_REG 1
+#define HEATER_WATER_TEMP_REGA 1
+#define HEATER_WATER_TEMP_REGB 2
+#define HEATER_WATER_TEMP_REGC 3
+#define NUM_INPUT_VALUE_REG 4
     
 /* address and length of holding value registers */
 #define HEATER_WATER_TARGET_TEMP_REG 0

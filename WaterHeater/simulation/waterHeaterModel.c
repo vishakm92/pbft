@@ -150,6 +150,14 @@ void * startPhysicalModel(void * data) {
         pthread_mutex_lock(&modbusRegisterAccessLock);
         setInputRegisterValue(mb_mapping, HEATER_WATER_TEMP_REG,
             (short)(tHeater * 10.0));
+	 setInputRegisterValue(mb_mapping, HEATER_WATER_TEMP_REGA,
+            (short)(tHeater * 10.0)+10);
+ 	setInputRegisterValue(mb_mapping, HEATER_WATER_TEMP_REGB,
+            (short)(tHeater * 10.0)+20);
+	setInputRegisterValue(mb_mapping, HEATER_WATER_TEMP_REGC,
+            (short)(tHeater * 10.0)+30);
+
+
         setInputRegisterBit(mb_mapping, HEATER_COIL_ENERGIZED, heaterOn);
         pthread_mutex_unlock(&modbusRegisterAccessLock);
         
@@ -176,9 +184,9 @@ void * startPhysicalModel(void * data) {
             displayFlag = "-";
         }
         
-        printf("Model Status(%s): %s%sSet Point: %5.2f, Temp: %5.2f\n",
+        printf("Model Status(%s): %s%sSet Point: %5.2f, Temp: %5.2f, Temp A: %5.2f, Temp B: %5.2f, Temp C: %5.2f\n",
                 displayFlag,
                 heaterEnableState, heaterElementState, 
-                tHeaterTarget, tHeater);
+                tHeaterTarget, tHeater,tHeater+10,tHeater+20,tHeater+30);
     }
 }

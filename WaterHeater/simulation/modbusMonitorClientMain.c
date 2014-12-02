@@ -197,7 +197,7 @@ int main(int argc, char *argv[])
         usleep(modbusPollIntervalmSec * 1000);
     }
     
-    printf("Failed modbus read\n", rc);
+    printf("Failed modbus read %d\n", rc);
     printf("Exiting due to read failure.\n");
 
     /* Free the memory */
