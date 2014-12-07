@@ -1,5 +1,5 @@
 #!/bin/bash
-count=1
+count=0
 
 while [ $count -le $1 ]
 do

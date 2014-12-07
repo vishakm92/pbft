@@ -21,7 +21,7 @@ def send_preprepare(q):
 	while 1:
 		#send preprepare to all ports
 		MESSAGE = q.get()
-		client_port=q.get()
+		#client_port=q.get()
 
 		if not (( MESSAGE.startswith("Prepare")) or ( MESSAGE.startswith("Commit"))):
 			#print "going to broadcast",MESSAGE
@@ -41,7 +41,7 @@ def read_thread(q):
 			if not data: break
 			#conn.send(data) #echo
 			q.put(data)
-			q.put(addr)
+			#q.put(addr)
 			data=0 #reset the buffer	
 			#conn.close()
 queue = multiprocessing.Queue()

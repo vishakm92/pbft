@@ -34,6 +34,7 @@ def send_to_slave(q,r):
                 print "response obtained",toHex(data)
 
 def listen_replica(q,r):
+        #print "in listen replica"
         global port_listen_replica,seq_process,transactionID,protocolID,unitID,functioncode,length,bytecode
         s_replica = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s_replica.bind((IP, port_listen_replica))
@@ -41,6 +42,7 @@ def listen_replica(q,r):
         while 1:
                 conn, addr = s_replica.accept()
                 data = conn.recv(BUFFER_SIZE)
+                #print "received data",data
                 if not data: break
                 #conn.send(data) #echo
                 modbus_response=data.split(",")
@@ -52,7 +54,7 @@ def listen_replica(q,r):
                         response=transactionID+protocolID+length+unitID+functioncode+bytecode+reg_value
                         #print "sending resposne",response_hex
                         #print "transaction ID",response_hex[:4],"Protocol ID",response_hex[4:8],"Length",response_hex[8:12],"Unit ID",response_hex[12:14],"function_code",response_hex[14:16],"byte code",response_hex[16:18],"Reg value",response_hex[18:22]
-                        print "must be same",response,response_hex 
+                        #print "must be same",response,response_hex 
                         r.put(binascii.a2b_hex(response))
                         #r.put(response)
                         seq_process=seq_process+1
@@ -74,8 +76,8 @@ def listen_master(q,r):
                 if not data: break
                 #conn.send(data) #echo
                 q.put(data)
-                data_hex = toHex(data)
-                print "query",data_hex
+                #data_hex = toHex(data)
+                #print "query",data_hex
                 #,"length",data_hex[8:12],
                 #,"reference num",data_hex[18:20],"word count",data_hex[20:24]
                 #print "received query",toHex(data)
