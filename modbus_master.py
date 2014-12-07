@@ -14,7 +14,7 @@ def master_poll(ip,port,address,nb):
 		times_list.append(after-before)
 		print times_list
 		ls.close()
-		time.sleep(10)
+		time.sleep(15)
 	print "avg time",reduce(lambda x, y: x + y, times_list) / len(times_list)
 master_poll("127.0.0.1",5101,0,1)
 

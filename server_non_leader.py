@@ -39,8 +39,9 @@ def send_to_slave(commit_q,response_q):
     s_local.connect((TCP_IP, 502))
     s_local.send(query)
     data=s_local.recv(BUFFER_SIZE)
+    reg_value=toHex(data)[18:22]
     #print "response from the slave",toHex(data)
-    response_q.put(data+","+seq)
+    response_q.put(data+","+seq+","+str(server_id))
 
 
 def commit_message_fn(commit_q,response_q): 
