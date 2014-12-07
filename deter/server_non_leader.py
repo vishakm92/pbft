@@ -1,19 +1,28 @@
 #!/usr/bin/env python
 
-import socket,sys,multiprocessing
+#Messages
+#<preprepare,seq,m>
+#<Prepare,seq,i>
+#<Commit,seq,i>
+#<LeaderChange>
 
-failures = (int(sys.argv[2]) -1) /3 #value of f iin algorithm
+import socket,sys,multiprocessing
+leader_id=0
+
+no_slaves=int(sys.argv[2])
+failures = (no_slaves -1) /3 #value of f iin algorithm
 preprepare={} #dictionary which has (seq,message) of preprepare messages
 prepare={} #dictionary which has (seq,count) of prepare messages
 commit={} #dictionary which has (seq,m) of commit messages
-
+#ip_list=["server0","server1","server2","server3","server4","client"]
+ip_list=["10.1.1.3","10.1.1.4","10.1.1.5","10.1.1.6","10.1.1.7","10.1.1.2"]
 TCP_IP = '127.0.0.1'
-TCP_PORT = int(sys.argv[1])
+server_id=int(sys.argv[1])
+TCP_PORT = 5000
 print "Server listening in port ", TCP_PORT
-server_id=TCP_PORT-5000
 BUFFER_SIZE = 1024    # Normally 1024, but we want fast response
-port_client=5100
-
+port_client=5000
+seq_no=1
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.bind((TCP_IP, TCP_PORT))
@@ -28,6 +37,20 @@ def toHex(s):
                 lst.append(hv)
         return reduce(lambda x,y:x+y, lst)
 
+
+def send_preprepare(q):
+        global seq_no
+        #print "in send preprepare function"
+        BUFFER_SIZE = 1024
+        while 1:
+                #send preprepare to all ports
+                MESSAGE = q.get()
+                client_port=q.get()
+
+                if not (( MESSAGE.startswith("Prepare")) or ( MESSAGE.startswith("Commit"))):
+                        #print "going to broadcast",MESSAGE
+                        sendall("Preprepare,"+str(seq_no)+","+MESSAGE)
+                        seq_no=seq_no+1
 
 def send_to_slave(commit_q,response_q):      
     data=commit_q.get()
@@ -54,11 +77,22 @@ def commit_message_fn(commit_q,response_q):
             s_local = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             s_local.connect((TCP_IP, port_client))
             #print "sending response to client"
-            s_local.send(response_q.get())
+            response=response_q.get()
+            s_local.send(response)
+            #print "sent to client",toHex(response)
 
 def process_message_fn(msg_q,prepare_q,commit_q):
+    global leader_id,server_id,seq_no    
+    if server_id == leader_id:
+        print "leader process!!!"
     while 1:
         data=msg_q.get()
+        if server_id == leader_id:
+            if not (( data.startswith("Prepare")) or ( data.startswith("Commit"))):
+                print "going to broadcast",data
+                sendall("Preprepare,"+str(seq_no)+","+data)
+                seq_no=seq_no+1
+
         if data.startswith("Preprepare"):
             #Preprepare message format <preprepare,seq,m>
             message=data.split(",")
@@ -93,15 +127,20 @@ def process_message_fn(msg_q,prepare_q,commit_q):
                     commit_q.put(query+","+str(seq))
                     sendall("Commit,"+str(seq)+","+str(server_id))
                     print "Message commited - with sequence",seq,"content - ",query
+        elif data.startswith("LeaderChange"):
+            if leader_id == server_id:
+                print "not leader anymore"
+            leader_id=(leader_id+1)%no_slaves
 
 
 def sendall(message):
     TCP_IP = '127.0.0.1'
+	PORT=5000
     BUFFER_SIZE = 1024
                             #send preprepare to all ports
-    for i in range(int(sys.argv[2])+1):
-        if not i == server_id: # dont send to itself
-            PORT = 5000+i
+    for i in range(no_slaves+1):
+        if not (i == server_id): # dont send to itself 
+            TCP_IP=ip_list[i]
             #print "sending ",message,"to port",PORT
             s_local = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             #s_local.settimeout(1)
@@ -132,12 +171,12 @@ response_queue=multiprocessing.Queue()
 p = multiprocessing.Process(target=read_thread, args=(queue,))
 p.start()
 
-leader = multiprocessing.Process(target=process_message_fn, args=(queue,prepare_queue,commit_queue,))
+process_msg = multiprocessing.Process(target=process_message_fn, args=(queue,prepare_queue,commit_queue))
 
 commit_thread = multiprocessing.Process(target=commit_message_fn, args=(commit_queue,response_queue))
 
 commit_thread.start()
-leader.start()
-leader.join()
+process_msg.start()
+process_msg.join()
 commit_thread.join()
 p.join()

@@ -1,10 +1,10 @@
 #!/bin/bash
-count=1
+count=0
 
 while [ $count -le $1 ]
 do
 	echo "Welcone $count times"
-	port=$(( count+5000))
+	port=$(( count))
 	echo $port
 	#cmd+=( --tab -e "python server_non_leader.py 5000" )
 	#x-terminal-emulator -e python server_non_leader.py 5000 

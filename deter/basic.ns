@@ -19,7 +19,10 @@ tb-set-node-os $nodeLeader Ubuntu1004-STD
 tb-set-node-os $nodeNonLeadera Ubuntu1004-STD
 tb-set-node-os $nodeNonLeaderb Ubuntu1004-STD
 tb-set-node-os $nodeNonLeaderc Ubuntu1004-STD         
-	
+
+tb-set-node-rpms $nodeClient https://drive.google.com/file/d/0B1JeH9YsE6pVRnpGN1Y5YXFIM1E/view?usp=sharing	
+#tb-set-node-tarfiles $nodeClient /usr/local/ https://drive.google.com/file/d/0B1JeH9YsE6pVY3g4V3BLNnZlU1k/view?usp=sharing
+
 $ns rtproto Static
 	
 # Go!
