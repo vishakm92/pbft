@@ -14,14 +14,15 @@ set nodeserverd [$ns node]
 set lan0 [$ns make-lan "$nodeClient $nodeservera $nodeserverb $nodeserverc $nodeserverd" 100Mb 0ms]
 	
 # Set the OS on a couple.
-tb-set-node-os $nodeClient Ubuntu1004-STD
-#tb-set-node-os $nodeservera Ubuntu1004-STD
-#tb-set-node-os $nodeserverb Ubuntu1004-STD
-tb-set-node-os $nodeserverc Ubuntu1004-STD
-tb-set-node-os $nodeserverd Ubuntu1004-STD         
+#tb-set-node-os $nodeClient Ubuntu1404-64-STD
+#tb-set-node-os $nodeservera Ubuntu1404-64-STD
+#tb-set-node-os $nodeserverb Ubuntu1404-64-STD
+#tb-set-node-os $nodeserverc Ubuntu1404-64-STD
+#tb-set-node-os $nodeserverd Ubuntu1404-64-STD         
 
-#tb-set-node-rpms $nodeClient https://github.com/vishakm92/pbft/blob/master/reqd_files/libmodbus_3.0.6-1_amd64.deb
-#tb-set-node-tarfiles $nodeClient /home/vishak/git_pbft/pbft/reqd_files deter.tar.gz
+tb-set-node-rpms $nodeClient /proj/GENIHiveMind/exp/pbft/libmodbus_3.0.6-1_amd64.deb
+tb-set-node-tarfiles $nodeClient /usr/local /proj/GENIHiveMind/exp/pbft/deter_files.tar.gz
+
 
 $ns rtproto Static
 	
